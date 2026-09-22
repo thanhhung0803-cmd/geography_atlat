@@ -1,0 +1,82 @@
+╔══════════════════════════════════════════════════════════════╗
+║  HƯỚNG DẪN NHANH - CHẠY TRÊN RASPBERRY PI 3B+              ║
+╚══════════════════════════════════════════════════════════════╝
+
+📌 VẤN ĐỀ HIỆN TẠI:
+   Module "onoff" đã được compile trên Windows, cần compile lại 
+   trên Raspberry Pi.
+
+🔧 GIẢI PHÁP - CHẠY CÁC LỆNH SAU:
+
+   1. Cài build tools (cần cho compile native modules):
+      ─────────────────────────────────────────────────────────
+      sudo apt-get update
+      sudo apt-get install -y build-essential python3-dev
+      ─────────────────────────────────────────────────────────
+
+   2. Xóa node_modules cũ (đã compile trên Windows):
+      ─────────────────────────────────────────────────────────
+      cd ~/Desktop/Dashboard_Geography_1
+      rm -rf node_modules package-lock.json
+      ─────────────────────────────────────────────────────────
+
+   3. Cài lại dependencies (sẽ compile cho Raspberry Pi):
+      ─────────────────────────────────────────────────────────
+      npm install
+      ─────────────────────────────────────────────────────────
+      ⏱ Lưu ý: Quá trình này mất 5-10 phút
+
+   4. Kiểm tra quyền GPIO:
+      ─────────────────────────────────────────────────────────
+      sudo usermod -a -G gpio $USER
+      ─────────────────────────────────────────────────────────
+      Sau đó logout và login lại (hoặc chạy: newgrp gpio)
+
+   5. Chạy ứng dụng:
+      ─────────────────────────────────────────────────────────
+      npm start
+      ─────────────────────────────────────────────────────────
+
+🔌 KẾT NỐI PHẦN CỨNG:
+
+   Nút 1:  3.3V ──[BUTTON]── GPIO 17 (Pin 11)  → Hà Nội
+   Nút 2:  3.3V ──[BUTTON]── GPIO 27 (Pin 13)  → Đà Nẵng
+   Nút 3:  3.3V ──[BUTTON]── GPIO 22 (Pin 15)  → TP.HCM
+           
+   ⚠ QUAN TRỌNG: Chỉ dùng 3.3V, KHÔNG dùng 5V!
+
+✅ KIỂM TRA THÀNH CÔNG:
+
+   Khi npm start, bạn sẽ thấy:
+   ┌────────────────────────────────────────────────────┐
+   │ Starting in GPIO mode...                           │
+   │ Setting up GPIO pins for city selection...        │
+   │ GPIO 17 configured → Position 6                   │
+   │ GPIO 27 configured → Position 2                   │
+   │ GPIO 22 configured → Position 5                   │
+   │ GPIO setup complete. Waiting for button press...  │
+   └────────────────────────────────────────────────────┘
+
+   Nhấn nút sẽ hiển thị:
+   → GPIO 17 activated → Position 6  (Hà Nội)
+   → GPIO 27 activated → Position 2  (Đà Nẵng)
+   → GPIO 22 activated → Position 5  (TP.HCM)
+
+🧪 TEST GPIO TRƯỚC (Tùy chọn):
+
+   python3 test_gpio.py
+   
+   Nhấn các nút để kiểm tra kết nối phần cứng.
+   Ctrl+C để thoát.
+
+📖 TÀI LIỆU CHI TIẾT:
+
+   • FIX_GPIO_ERROR.md    - Khắc phục lỗi GPIO
+   • GPIO_WIRING.md       - Sơ đồ kết nối chi tiết
+   • SETUP_RASPBERRY_PI.md - Hướng dẫn đầy đủ
+
+🆘 NẾU VẪN LỖI:
+
+   Xem file: FIX_GPIO_ERROR.md
+
+

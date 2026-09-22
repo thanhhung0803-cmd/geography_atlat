@@ -1,0 +1,39 @@
+{
+  "name": "dashboard-geography",
+  "version": "1.2.0",
+  "description": "Ứng dụng desktop giới thiệu di sản Nam Ô bằng hình ảnh, thông tin và âm thanh",
+  "main": "main.js",
+  "author": "",
+  "license": "MIT",
+  "scripts": {
+    "start": "set \"ELECTRON_RUN_AS_NODE=\"&& electron .",
+    "dist:win": "electron-builder --win portable"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "electron": "^31.2.0",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.tuantran1305.dashboardgeography",
+    "productName": "Dashboard Di sản Nam Ô",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "renderer/**/*",
+      "*.jpg",
+      "*.mp3",
+      "package.json"
+    ],
+    "win": {
+      "target": "portable",
+      "signAndEditExecutable": false,
+      "artifactName": "${productName}-${version}-${arch}.${ext}"
+    }
+  }
+}
+
+

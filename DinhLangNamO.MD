@@ -1,0 +1,10 @@
+Đình làng Nam Ô tọa lạc tại phường Hải Vân, thành phố Đà Nẵng. Nằm ở vị trí đắc địa nơi chân sóng vịnh Đà Nẵng giao hòa cùng dòng sông Cu Đê hiền hòa, ngôi đình không chỉ là trái tim tâm linh của một làng cổ ven biển có niên đại hàng trăm năm, mà còn là chứng tích sống động ghi dấu quá trình khai sơn phá thạch của các bậc tiền nhân trên con đường mở cõi về phương Nam.
+Cội nguồn lịch sử và dấu ấn thời gian
+Làng cổ Nam Ô hình thành từ thời vua Lê Thánh Tông (thế kỷ XV), khi các lưu dân Đại Việt theo chiếu mở cõi vào khai hoang lập ấp. Nhằm tưởng nhớ công đức tiền nhân và lập nơi hội họp, tế tự, đình làng Nam Ô đã được dân làng khởi dựng từ rất sớm.
+Trải qua mưa bom bão đạn trong hai cuộc kháng chiến chống Pháp và chống Mỹ, ngôi đình từng chịu nhiều hư hại, tổn thất. Tuy nhiên, bằng tấm lòng trân quý di sản của con em bổn vạn và sự hỗ trợ của chính quyền, đình làng Nam Ô đã được trùng tu, tôn tạo khang trang trên nền đất cũ, giữ gìn vẹn nguyên thần thái tôn nghiêm và được xếp hạng là Di tích lịch sử - văn hóa cấp thành phố.
+Trung tâm sinh hoạt cộng đồng và lễ hội truyền thống
+Vượt lên trên chức năng thờ tự, đình làng là biểu tượng cố kết cộng đồng của người dân Nam Ô:
+Lễ hội đình làng: Hằng năm, vào dịp xuân thu nhị kỳ (đặc biệt là lễ Kỳ Yên đầu xuân), đình rực rỡ cờ hoa mở hội. Các nghi lễ cúng tế, đọc văn tế tiền hiền diễn ra trang nghiêm trong tiếng chiêng trống trầm hùng, cầu cho quốc thái dân an, phong điều vũ thuận.
+Không gian gắn kết: Sân đình là nơi các bô lão họp bàn việc làng, nơi tổ chức các trò chơi dân gian, hát tuồng, thi ẩm thực làng nghề và diễn xướng văn hóa biển mỗi dịp hội hè.
+Giá trị văn hóa trong không gian di sản Nam Ô
+Trong quần thể di sản phong phú của vùng đất cửa biển—bên cạnh Lăng Ngư Ông, Miếu Bà Huyền Trân, Giếng Chăm cổ và làng nghề nước mắm trứ danh—Đình làng Nam Ô đóng vai trò là "trục xương sống" về văn hóa và cội nguồn. Ngôi đình là điểm tựa tâm linh bền bỉ, nhắc nhở các thế hệ người Nam Ô về đạo lý "uống nước nhớ nguồn" và gìn giữ nét hồn cốt làng chài giữa nhịp phát triển hiện đại của đô thị Đà Nẵng.

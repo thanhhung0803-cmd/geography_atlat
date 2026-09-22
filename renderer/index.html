@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bản đồ Di sản Nam Ô - Đà Nẵng</title>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; media-src 'self' data:;">
+  <style>
+    :root { color-scheme: light dark; }
+    body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; background: #f6f8fb; color: #111; }
+    .app {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 16px;
+      padding: 16px;
+      height: 100vh;
+      box-sizing: border-box;
+    }
+    .panel {
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 16px;
+      overflow: auto;
+      background: #fff;
+      color: #111;
+    }
+    .panel h1 { margin-top: 0; }
+    .city-meta { color: #666; margin-bottom: 12px; }
+    .questions ol { padding-left: 20px; }
+    .media { margin: 12px 0 16px; }
+    .media img { width: 100%; max-width: 420px; height: auto; border-radius: 8px; border: 1px solid #e2e8f0; display: block; }
+    .toolbar { position: fixed; top: 10px; right: 12px; z-index: 100; }
+    .toolbar button { padding: 8px 12px; border-radius: 8px; border: 1px solid #cbd5e1; background: #ffffff; color: #0f172a; cursor: pointer; font-weight: 600; }
+    .toolbar button:hover { background: #f1f5f9; }
+    .qa-list { list-style: decimal inside; padding-left: 0; margin: 8px 0 0; }
+    .qa-item { position: relative; margin: 12px 0; line-height: 1.6; }
+    .qa-item .q { display: inline; color: #0f172a; font-weight: 600; cursor: pointer; }
+    .qa-item .a {
+      display: none; /* hidden by default */
+      margin-top: 8px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      background: #eef2ff; /* light indigo */
+      border: 1px solid #c7d2fe;
+      color: #111827;
+      box-shadow: 0 1px 0 rgba(0,0,0,0.03);
+    }
+    .qa-item.show .a { display: block; }
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: #eef2ff;
+      color: #3730a3;
+      font-weight: 600;
+      margin-left: 8px;
+      font-size: 12px;
+    }
+    .hint { color: #334155; font-size: 13px; }
+    .empty { color: #475569; }
+
+    @media (prefers-color-scheme: dark) {
+      body { background: #0b1120; color: #e5e7eb; }
+      .panel { background: #0f172a; border-color: #334155; color: #e5e7eb; }
+      .city-meta { color: #cbd5e1; }
+      .hint { color: #cbd5e1; }
+      .empty { color: #94a3b8; }
+      .badge { background: #1e293b; color: #93c5fd; }
+      .media img { border-color: #334155; }
+      .qa-item .q { color: #e2e8f0; cursor: pointer; }
+      .qa-item .a { background: #0f172a; border-color: #334155; color: #e5e7eb; box-shadow: none; }
+    }
+
+    /* Explicit theme overrides (manual toggle has priority) */
+    body.theme-dark { background: #0b1120; color: #e5e7eb; }
+    body.theme-dark .panel { background: #0f172a; border-color: #334155; color: #e5e7eb; }
+    body.theme-dark .city-meta { color: #cbd5e1; }
+    body.theme-dark .hint { color: #cbd5e1; }
+    body.theme-dark .empty { color: #94a3b8; }
+    body.theme-dark .badge { background: #1e293b; color: #93c5fd; }
+    body.theme-dark .qa-item .q { color: #e2e8f0; }
+    body.theme-dark .qa-item .a { background: #0f172a; border-color: #334155; color: #e5e7eb; box-shadow: none; }
+    body.theme-dark .media img { border-color: #334155; }
+    body.theme-dark .toolbar button { background: #111827; color: #e5e7eb; border-color: #334155; }
+    body.theme-dark .toolbar button:hover { background: #1f2937; }
+
+    body.theme-light { background: #f6f8fb; color: #111; }
+    body.theme-light .panel { background: #fff; border-color: #ccc; color: #111; }
+    body.theme-light .city-meta { color: #666; }
+    body.theme-light .hint { color: #334155; }
+    body.theme-light .empty { color: #475569; }
+    body.theme-light .badge { background: #eef2ff; color: #3730a3; }
+    body.theme-light .qa-item .q { color: #0f172a; }
+    body.theme-light .qa-item .a { background: #eef2ff; border-color: #c7d2fe; color: #111827; }
+    body.theme-light .media img { border-color: #e2e8f0; }
+    body.theme-light .toolbar button { background: #ffffff; color: #0f172a; border-color: #cbd5e1; }
+    body.theme-light .toolbar button:hover { background: #f1f5f9; }
+  </style>
+  <script src="./cities.js" defer></script>
+  <script src="./renderer.js" defer></script>
+  <link rel="preload" href="./renderer.js" as="script">
+  <link rel="preload" href="./cities.js" as="script">
+  <link rel="icon" href="data:,">
+  </head>
+<body>
+  <div class="toolbar">
+    <button id="theme-toggle" type="button" aria-label="Đổi chế độ sáng/tối">🌙 Chế độ tối</button>
+  </div>
+  <div class="app">
+    <section class="panel" id="left-panel">
+      <h1 id="city-title">Chờ cảm ứng từ bản đồ<span class="badge" id="pos-badge">--</span></h1>
+      <div class="city-meta" id="city-sub">Nhấn phím số từ 1 đến 7 để khám phá di sản Nam Ô.</div>
+      <div id="city-content" class="empty">Chưa có điểm đến nào được chọn.</div>
+    </section>
+    <aside class="panel" id="right-panel">
+      <h2>Câu hỏi về Nam Ô</h2>
+      <div class="hint">Trả lời nhanh để khám phá di sản, cảnh quan và ẩm thực Nam Ô.</div>
+      <div id="questions" class="questions">
+        <div class="empty">Chưa có câu hỏi. Hãy chọn một điểm đến (1-7).</div>
+      </div>
+    </aside>
+  </div>
+  </body>
+  </html>

@@ -1,0 +1,10 @@
+Lăng Ngư Ông Nam Ô (hay Lăng Cá Ông) tọa lạc tại làng chài cổ Nam Ô, phường Hải Vân, thành phố Đà Nẵng. Tựa lưng vào dải đất ven vịnh Đà Nẵng và hướng mặt nhìn ra biển cả lộng gió, lăng không chỉ là di tích kiến trúc cổ kính mà còn là biểu tượng tâm linh bất khả xâm phạm, chở che cho cuộc sống muôn đời của ngư dân đầu sóng ngọn gió. 
+Lịch sử hình thành và tín ngưỡng thờ phụng
+Tín ngưỡng thờ Cá Ông (Nam Hải Ngọc Lân Đại Tướng Quân) bắt nguồn sâu xa từ tục thờ thần sóng biển Po Riyak của người Chăm pa, sau đó được cư dân Đại Việt tiếp thu và bản địa hóa mạnh mẽ trong quá trình Nam tiến. Theo sử sách và lời kể của các bô lão, Lăng Ông Nam Ô được khởi dựng từ thời vua Gia Long (khoảng năm 1802). 
+Trong tâm thức dân gian, cá voi là loài linh vật cứu khổ cứu nạn, thường dìu đỡ thuyền bè vượt qua cuồng phong bão giáp. Khi cá Ông "lụy" (chết giạt vào bờ), làng biển tổ chức nghi thức tang lễ long trọng như với người ruột thịt, để tang đủ 3 năm rồi làm lễ cải táng đưa ngọc cốt vào lăng phụng thờ. Hiện nay, Lăng Ngư Ông Nam Ô là nơi lưu giữ và thờ cúng gần 60 bộ cốt Ông – một con số minh chứng cho bề dày lịch sử và sự gắn bó khăng khít qua hàng trăm năm của người dân với đại dương.
+Lễ hội Cầu Ngư – Nhịp đập di sản văn hóa biển 
+Lăng Ông là trung tâm tổ chức Lễ hội Cầu Ngư Nam Ô – sự kiện trọng đại nhất năm của làng, diễn ra định kỳ vào 15/2 âm lịch. Lễ hội bao gồm hai phần trang nghiêm và sôi nổi:
+Phần Lễ: Gồm các nghi thức nghinh thần từ biển về lăng, tế âm linh, tế Chánh và đọc văn tế tạ ơn thần Nam Hải che chở cho sóng yên biển lặng. 
+Phần Hội: Bừng sáng sức sống làng chài với các hội thi đua thuyền, lắc thúng chai, thi kéo co, đan lưới và hội ẩm thực làng nghề. 
+Giá trị văn hóa và kết nối du lịch
+Lăng Ngư Ông cùng với rạn Nam Ô, di tích Dinh Bà Huyền Trân, giếng vuông Chăm pa và làng nghề nước mắm Nam Ô truyền thống hợp thành quần thể di sản văn hóa độc đáo hiếm nơi nào có được. Đây không chỉ là chốn neo đậu bình yên về tâm linh cho những chuyến hải trình đánh bắt xa khơi, mà còn là điểm đến giàu chiều sâu cho du khách muốn tìm hiểu linh hồn và ký ức của cư dân miền biển xứ Quảng.
