@@ -1,0 +1,6 @@
+{
+  "disableGPU": false,
+  "useGPIO": true,
+  "useVoice": true,
+  "useKeyboard": false
+}

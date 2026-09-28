@@ -6,7 +6,7 @@
   "author": "",
   "license": "MIT",
   "scripts": {
-    "start": "set \"ELECTRON_RUN_AS_NODE=\"&& electron .",
+    "start": "node scripts/start.js",
     "dist:win": "electron-builder --win portable"
   },
   "dependencies": {},

@@ -67,23 +67,14 @@ function startVoice(onEvent) {
       console.error('[VOICE] No vosk (node) and missing voice_bridge.py');
       return { stop() {} };
     }
-      // Use system python3 (venv causes issues)
-      const pyCmds = ['python3', 'python'];
-    let proc = null;
-    for (const cmd of pyCmds) {
-      try {
-        console.log('[VOICE] Trying to spawn:', cmd, bridge);
-        proc = spawn(cmd, [bridge], { stdio: ['pipe','pipe','pipe'] }); // Enable stdin
-        console.log('[VOICE] Spawned successfully with:', cmd);
-        break;
-      } catch (e) {
-        console.error('[VOICE] Spawn failed with', cmd, ':', e.message);
-      }
-    }
-    if (!proc) {
-      console.error('[VOICE] Could not spawn python for bridge');
-      return { stop() {} };
-    }
+    const venvPython = process.platform === 'win32'
+      ? path.join(__dirname, '.venv', 'Scripts', 'python.exe')
+      : path.join(__dirname, '.venv', 'bin', 'python3');
+    const pyCmd = fs.existsSync(venvPython)
+      ? venvPython
+      : (process.platform === 'win32' ? 'python' : 'python3');
+    console.log('[VOICE] Starting Python bridge with:', pyCmd);
+    const proc = spawn(pyCmd, [bridge], { stdio: ['pipe','pipe','pipe'] });
     console.log('[VOICE] Using Python bridge, PID:', proc.pid);
     let isPaused = false;
     let lastTriggerTs = 0;
@@ -170,7 +161,7 @@ function startVoice(onEvent) {
   if (!fs.existsSync(modelPath)) {
     console.warn('[VOICE] Model not found at', modelPath, '→ falling back to python (if available)');
     vosk = null; // force fallback next call
-    return startVoice(onPosition);
+    return startVoice(onEvent);
   }
   try {
     vosk.setLogLevel(-1);
@@ -207,7 +198,7 @@ function startVoice(onEvent) {
   } catch (e) {
     console.error('[VOICE] Node vosk failure, fallback to python:', e.message);
     vosk = null;
-    return startVoice(onPosition);
+    return startVoice(onEvent);
   }
 }
 
