@@ -1,205 +1,115 @@
-// voice.js - Voice recognition wrapper for Vietnamese city/province names.
-// Preferred: Python bridge (voice_bridge.py) using vosk (pip) when Node vosk not installed.
-// If Node module 'vosk' is available, we use it directly; otherwise fallback to Python.
+// Offline Vietnamese keyword recognition for Raspberry Pi.
+// The Python bridge owns Vosk + ALSA; this module maps recognized text to the
+// same positions used by GPIO and forwards pause/resume commands.
 
 const fs = require('node:fs');
 const path = require('node:path');
-let vosk = null; // optional
-try { vosk = require('vosk'); } catch { vosk = null; }
 const { spawn } = require('node:child_process');
 
-const SAMPLE_RATE = 16000;
+const PHRASES = [
+  { position: 1, names: ['lang ca ong', 'lang ngu ong', 'lang ngu ong nam o'] },
+  { position: 2, names: ['dinh lang', 'dinh lang nam o'] },
+  { position: 3, names: ['mieu ba huyen tran', 'huyen tran'] },
+  { position: 4, names: ['dinh am hon', 'dinh co hon', 'dinh co hon nam o', 'mieu am linh'] },
+  { position: 5, names: ['gieng vuong', 'gieng cham', 'gieng cham co nam o', 'gieng lang'] },
+  { position: 6, names: ['ghenh nam o', 'ran nam o'] },
+  { position: 7, names: ['nuoc mam nam o', 'nuoc mam', 'lang nghe nuoc mam nam o'] }
+];
 
-// Map normalized Nam O destination names -> position numbers (see CITY_DATA positions)
-const NAME_TO_POSITION = {
-  'lang ngu ong nam o': 1,
-  'lang ca ong': 1,
-  'lang ong': 1,
-  'dinh lang nam o': 2,
-  'dinh nam o': 2,
-  'mieu ba huyen tran': 3,
-  'dinh ba huyen tran': 3,
-  'mieu ba lieu hanh': 3,
-  'dinh co hon nam o': 4,
-  'mieu am linh': 4,
-  'gieng cham co nam o': 5,
-  'gieng lang': 5,
-  'gieng vuong': 5,
-  'ghenh nam o': 6,
-  'ran nam o': 6,
-  'lang nghe nuoc mam nam o': 7,
-  'nuoc mam nam o': 7,
-  'lang nuoc mam nam o': 7,
-  'goi ca nam o': 8,
-  'goi ca': 8
-};
+const NAME_TO_POSITION = PHRASES
+  .flatMap(({ position, names }) => names.map((name) => ({ name, position })))
+  .sort((a, b) => b.name.length - a.name.length);
 
 function stripDiacritics(input) {
   return String(input || '')
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
-    .replace(/Đ/g, 'D')
-    .replace(/đ/g, 'd')
+    .replace(/\u0110/g, 'D')
+    .replace(/\u0111/g, 'd')
     .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
     .trim();
 }
 
 function findPositionFromText(text) {
-  const norm = stripDiacritics(text);
-  const tokens = norm.split(/[^a-z0-9]+/).filter(Boolean);
-  const variants = new Set([norm]);
-  for (let size = 2; size <= 4; size++) {
-    for (let i = 0; i <= tokens.length - size; i++) {
-      variants.add(tokens.slice(i, i + size).join(' '));
-    }
-  }
-  for (const v of variants) {
-    if (NAME_TO_POSITION[v]) return NAME_TO_POSITION[v];
-  }
-  return null;
+  const normalized = ` ${stripDiacritics(text)} `;
+  const match = NAME_TO_POSITION.find(({ name }) => normalized.includes(` ${name} `));
+  return match ? match.position : null;
 }
 
-function startVoice(onEvent) {
-  if (!vosk) {
-    // Fallback: python bridge
-    const bridge = path.join(__dirname, 'voice_bridge.py');
-    if (!fs.existsSync(bridge)) {
-      console.error('[VOICE] No vosk (node) and missing voice_bridge.py');
-      return { stop() {} };
-    }
-    const venvPython = process.platform === 'win32'
-      ? path.join(__dirname, '.venv', 'Scripts', 'python.exe')
-      : path.join(__dirname, '.venv', 'bin', 'python3');
-    const pyCmd = fs.existsSync(venvPython)
-      ? venvPython
-      : (process.platform === 'win32' ? 'python' : 'python3');
-    console.log('[VOICE] Starting Python bridge with:', pyCmd);
-    const proc = spawn(pyCmd, [bridge], { stdio: ['pipe','pipe','pipe'] });
-    console.log('[VOICE] Using Python bridge, PID:', proc.pid);
-    let isPaused = false;
-    let lastTriggerTs = 0;
-    let lastPos = null;
-    const DEBOUNCE_MS = 5000; // ignore repeats within 5s (increased from 2s)
-
-    proc.stdout.on('data', d => {
-      if (isPaused) return; // Skip processing when paused
-      const lines = d.toString().split(/\r?\n/).filter(Boolean);
-      for (const line of lines) {
-        let isFinal = false;
-        let txt = '';
-        if (line.startsWith('START:')) {
-          onEvent({ type: 'start', at: Number(line.slice(6).trim()) || Date.now() });
-          continue;
-        }
-        if (line.startsWith('END:')) {
-          onEvent({ type: 'end', at: Number(line.slice(4).trim()) || Date.now() });
-          continue;
-        }
-        if (line.startsWith('FINAL:')) {
-          isFinal = true;
-          txt = line.slice(6).trim();
-        } else if (line.startsWith('PARTIAL:')) {
-          txt = line.slice(8).trim();
-        } else {
-          continue;
-        }
-        if (!txt) continue;
-        console.debug('[VOICE]', isFinal ? 'FINAL raw:' : 'PARTIAL raw:', txt);
-        const pos = findPositionFromText(txt);
-        const now = Date.now();
-        
-        // Ignore if same position triggered within 10 seconds (prevent acoustic feedback loop)
-        if (pos && pos === lastPos && now - lastTriggerTs < 10000) {
-          console.debug('[VOICE] Ignoring repeated position', pos, 'within 10s (acoustic feedback prevention)');
-          continue;
-        }
-        
-        if (pos && (pos !== lastPos || now - lastTriggerTs > DEBOUNCE_MS)) {
-          console.debug('[VOICE] Trigger position', pos, 'from text:', txt, isFinal ? '(final)' : '(partial)');
-          lastPos = pos;
-          lastTriggerTs = now;
-          onEvent(pos);
-        }
-      }
-    });
-    proc.stderr.on('data', e => {
-      const msg = e.toString().trim();
-      if (msg) console.log('[VOICE][py]', msg);  // Đổi từ debug sang log để thấy rõ
-    });
-    proc.on('error', (err) => {
-      console.error('[VOICE] Bridge process error:', err);
-    });
-    proc.on('exit', (code, signal) => {
-      console.error('[VOICE] Bridge exited with code:', code, 'signal:', signal);
-    });
-    return {
-      stop() { try { proc.kill('SIGINT'); } catch {} },
-      pause() {
-        isPaused = true;
-        console.log('[VOICE] Paused (muted during audio playback)');
-        // Send PAUSE command to Python bridge
-        try {
-          proc.stdin.write('PAUSE\n');
-        } catch (e) {
-          console.error('[VOICE] Failed to send PAUSE:', e.message);
-        }
-      },
-      resume() {
-        isPaused = false;
-        console.log('[VOICE] Resumed listening');
-        // Send RESUME command to Python bridge
-        try {
-          proc.stdin.write('RESUME\n');
-        } catch (e) {
-          console.error('[VOICE] Failed to send RESUME:', e.message);
-        }
-      }
-    };
+function startVoice(onPosition) {
+  const bridge = path.join(__dirname, 'voice_bridge.py');
+  if (!fs.existsSync(bridge)) {
+    console.error('[VOICE] Missing voice_bridge.py');
+    return { stop() {}, pause() {}, resume() {} };
   }
 
-  const modelPath = path.join(__dirname, 'models', 'vn');
-  if (!fs.existsSync(modelPath)) {
-    console.warn('[VOICE] Model not found at', modelPath, '→ falling back to python (if available)');
-    vosk = null; // force fallback next call
-    return startVoice(onEvent);
-  }
-  try {
-    vosk.setLogLevel(-1);
-    const model = new vosk.Model(modelPath);
-    const recognizer = new vosk.Recognizer({ model, sampleRate: SAMPLE_RATE });
-    console.log('[VOICE] Using Node vosk + arecord');
-  const arecord = spawn('arecord', ['-f','S16_LE','-r',String(SAMPLE_RATE),'-c','1','-t','raw'], { stdio: ['ignore','pipe','pipe'] });
-    let lastTriggerTs = 0;
-    let lastPos = null;
-    const DEBOUNCE_MS = 2000;
-    arecord.stdout.on('data', data => {
-      try {
-        if (recognizer.acceptWaveform(data)) {
-          const res = recognizer.result();
-          const txt = res && res.text ? res.text.trim() : '';
-          if (txt) {
-            const pos = findPositionFromText(txt);
-            const now = Date.now();
-            if (pos && (pos !== lastPos || now - lastTriggerTs > DEBOUNCE_MS)) {
-              lastPos = pos;
-              lastTriggerTs = now;
-              onEvent(pos);
-            }
-          }
-        }
-      } catch (e) { console.error('[VOICE] Error:', e.message); }
-    });
-    function stop() {
-      try { arecord.kill('SIGINT'); } catch {}
-      try { recognizer.free(); } catch {}
-      try { model.free(); } catch {}
+  const venvPython = process.platform === 'win32'
+    ? path.join(__dirname, '.venv', 'Scripts', 'python.exe')
+    : path.join(__dirname, '.venv', 'bin', 'python3');
+  const python = fs.existsSync(venvPython)
+    ? venvPython
+    : (process.platform === 'win32' ? 'python' : 'python3');
+  const proc = spawn(python, [bridge], { stdio: ['pipe', 'pipe', 'pipe'] });
+  console.log('[VOICE] Python bridge started, PID:', proc.pid);
+
+  let stdoutBuffer = '';
+  let paused = false;
+  let lastPosition = null;
+  let lastTriggerAt = 0;
+  const SAME_POSITION_COOLDOWN_MS = 3000;
+
+  proc.stdout.on('data', (chunk) => {
+    stdoutBuffer += chunk.toString('utf8');
+    const lines = stdoutBuffer.split(/\r?\n/);
+    stdoutBuffer = lines.pop() || '';
+
+    for (const line of lines) {
+      if (paused || !line.startsWith('FINAL:')) continue;
+      const recognizedText = line.slice('FINAL:'.length).trim();
+      const position = findPositionFromText(recognizedText);
+      if (!position) {
+        console.log('[VOICE] No keyword in:', recognizedText);
+        continue;
+      }
+
+      const now = Date.now();
+      if (position === lastPosition && now - lastTriggerAt < SAME_POSITION_COOLDOWN_MS) continue;
+      lastPosition = position;
+      lastTriggerAt = now;
+      console.log(`[VOICE] "${recognizedText}" -> position ${position}`);
+      onPosition(position);
     }
-    return { stop };
-  } catch (e) {
-    console.error('[VOICE] Node vosk failure, fallback to python:', e.message);
-    vosk = null;
-    return startVoice(onEvent);
+  });
+
+  proc.stderr.on('data', (chunk) => {
+    const message = chunk.toString('utf8').trim();
+    if (message) console.log('[VOICE][py]', message);
+  });
+  proc.on('error', (error) => console.error('[VOICE] Cannot run Python bridge:', error.message));
+  proc.on('exit', (code, signal) => console.log('[VOICE] Bridge stopped:', { code, signal }));
+
+  function command(value) {
+    if (!proc.killed && proc.stdin.writable) proc.stdin.write(`${value}\n`);
   }
+
+  return {
+    stop() {
+      if (!proc.killed) proc.kill('SIGINT');
+    },
+    pause() {
+      if (paused) return;
+      paused = true;
+      command('PAUSE');
+      console.log('[VOICE] Paused while narration is playing');
+    },
+    resume() {
+      if (!paused) return;
+      paused = false;
+      command('RESUME');
+      console.log('[VOICE] Listening');
+    }
+  };
 }
 
 module.exports = { startVoice, findPositionFromText };

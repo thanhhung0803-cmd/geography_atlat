@@ -2,6 +2,12 @@
   let audioEl = null;
   let isPlayingAudio = false; // Flag to prevent concurrent audio playback
 
+  function setNarrationPlaying(isPlaying) {
+    if (window.api && typeof window.api.setNarrationPlaying === 'function') {
+      window.api.setNarrationPlaying(isPlaying);
+    }
+  }
+
   function ensureAudio() {
     if (!audioEl) {
       audioEl = document.createElement('audio');
@@ -106,6 +112,7 @@
     }
     
     isPlayingAudio = true;
+    setNarrationPlaying(true);
     const el = ensureAudio();
     const candidates = buildAudioCandidates(title, explicitAudio);
     console.log('[RENDERER] Building audio candidates for:', title);
@@ -114,6 +121,7 @@
     if (candidates.length === 0) {
       console.warn('[RENDERER] No audio candidates found');
       isPlayingAudio = false;
+      setNarrationPlaying(false);
       return;
     }
 
@@ -134,6 +142,7 @@
       if (i >= candidates.length) {
         console.warn('[RENDERER] No audio file found after trying all candidates');
         isPlayingAudio = false; // Reset flag
+        setNarrationPlaying(false);
         return;
       }
       
@@ -155,10 +164,10 @@
         console.log('[RENDERER] Audio playback ended (via ended event)');
         foundAudio = true;
         isPlayingAudio = false; // Reset flag
+        setNarrationPlaying(false);
       };
       
       el.onended = notifyEnded;
-      el.addEventListener('ended', notifyEnded, { once: true }); // Backup listener
       
       el.onerror = () => {
         console.warn('[RENDERER] Failed to load:', src);

@@ -21,3 +21,22 @@ const samples = [
 for (const s of samples) {
   console.log(s, '=>', findPositionFromText(s));
 }
+
+const requiredKeywords = [
+  ['Miếu Bà Huyền Trân', 3],
+  ['Ghềnh Nam Ô', 6],
+  ['Lăng Cá Ông', 1],
+  ['Giếng Vuông', 5],
+  ['Dinh Âm Hồn', 4],
+  ['Nước Mắm Nam Ô', 7],
+  ['Đình Làng', 2]
+];
+
+for (const [keyword, expected] of requiredKeywords) {
+  const actual = findPositionFromText(keyword);
+  if (actual !== expected) {
+    throw new Error(`${keyword}: expected ${expected}, received ${actual}`);
+  }
+}
+
+console.log('All required voice keywords mapped correctly.');

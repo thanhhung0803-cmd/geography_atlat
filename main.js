@@ -1,4 +1,4 @@
-const { app, BrowserWindow, globalShortcut } = require('electron');
+const { app, BrowserWindow, globalShortcut, ipcMain } = require('electron');
 const fs = require('node:fs');
 const path = require('node:path');
 const { spawn } = require('node:child_process');
@@ -10,6 +10,7 @@ let gpioProcess = null;
 let voiceController = null;
 let rendererReady = false;
 let pendingPosition = null;
+let narrationPlaying = false;
 
 function readConfig() {
   const defaults = {
@@ -88,10 +89,22 @@ function startVoiceRecognition() {
         openPosition(event);
       }
     });
+    if (narrationPlaying && typeof voiceController.pause === 'function') {
+      voiceController.pause();
+    }
   } catch (error) {
     console.error('[VOICE] Cannot start:', error.message);
   }
 }
+
+ipcMain.on('narration-state', (_event, isPlaying) => {
+  narrationPlaying = Boolean(isPlaying);
+  if (!voiceController) return;
+  const method = narrationPlaying ? 'pause' : 'resume';
+  if (typeof voiceController[method] === 'function') {
+    voiceController[method]();
+  }
+});
 
 function createWindow() {
   mainWindow = new BrowserWindow({
