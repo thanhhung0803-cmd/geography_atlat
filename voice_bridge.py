@@ -40,10 +40,16 @@ COMMANDS = [
     ),
     ("gh\u1ec1nh nam \u00f4", ["gh\u1ec1nh nam \u00f4", "gh\u1ec1nh nam"]),
     ("l\u00e0ng c\u00e1 \u00f4ng", ["l\u00e0ng c\u00e1 \u00f4ng", "l\u00e0ng c\u00e1", "c\u00e1 \u00f4ng"]),
-    ("gi\u1ebfng vu\u00f4ng", ["gi\u1ebfng vu\u00f4ng"]),
+    ("gi\u1ebfng vu\u00f4ng", ["gi\u1ebfng vu\u00f4ng", "gi\u1ebfng ch\u0103m"]),
     (
         "dinh \u00e2m h\u1ed3n",
-        ["dinh \u00e2m h\u1ed3n", "dinh h\u1ed3n", "\u00e2m h\u1ed3n", "\u00e2m linh"],
+        [
+            "dinh \u00e2m h\u1ed3n",
+            "dinh c\u00f4 h\u1ed3n",
+            "dinh h\u1ed3n",
+            "\u00e2m h\u1ed3n",
+            "\u00e2m linh",
+        ],
     ),
     ("n\u01b0\u1edbc m\u1eafm nam \u00f4", ["n\u01b0\u1edbc m\u1eafm nam \u00f4", "n\u01b0\u1edbc m\u1eafm"]),
     ("\u0111\u00ecnh l\u00e0ng", ["\u0111\u00ecnh l\u00e0ng"]),

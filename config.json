@@ -2,5 +2,5 @@
   "disableGPU": false,
   "useGPIO": false,
   "useVoice": false,
-  "useKeyboard": false
+  "useKeyboard": true
 }

@@ -136,6 +136,19 @@ function createWindow() {
   mainWindow.on('closed', () => {
     rendererReady = false;
   });
+  if (config.useKeyboard) {
+    // Window-scoped rather than globalShortcut so number keys keep working in
+    // other apps on a shared Windows desktop.
+    mainWindow.webContents.on('before-input-event', (event, input) => {
+      if (input.type !== 'keyDown' || input.isAutoRepeat) return;
+      if (input.control || input.alt || input.meta) return;
+      const position = Number(input.key);
+      if (position >= FIRST_POSITION && position <= LAST_POSITION) {
+        event.preventDefault();
+        openPosition(position, 'KEYBOARD');
+      }
+    });
+  }
   mainWindow.loadFile(path.join(__dirname, 'renderer', 'index.html'));
 }
 
@@ -149,12 +162,6 @@ app.whenReady().then(() => {
       mainWindow.setFullScreen(!mainWindow.isFullScreen());
     }
   });
-
-  if (config.useKeyboard) {
-    for (let position = FIRST_POSITION; position <= LAST_POSITION; position++) {
-      globalShortcut.register(String(position), () => openPosition(position, 'KEYBOARD'));
-    }
-  }
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
