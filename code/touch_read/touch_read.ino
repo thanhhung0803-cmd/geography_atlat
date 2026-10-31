@@ -1,13 +1,12 @@
 #include <WiFi.h>
 #include <HTTPClient.h>
 
-// Wi-Fi credentials
-static const char* WIFI_SSID = "Duy Tuan";
-static const char* WIFI_PASSWORD = "12345678";
+// WIFI_SSID, WIFI_PASSWORD and TB_TOKEN live in secrets.h (not in git).
+// Copy secrets.example.h to secrets.h and fill in real values.
+#include "secrets.h"
 
 // ThingsBoard HTTP settings
 static const char* TB_HOST = "thingsboard.cloud";      // host only
-static const char* TB_TOKEN = "SVrrYO07oqeucp6Cs2kf";  // device token
 static String TB_ATTRIBUTES_URL;                       // built in setup
 
 // GPIO pins
