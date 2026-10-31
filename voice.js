@@ -1,6 +1,6 @@
 // Offline Vietnamese keyword recognition for Raspberry Pi.
 // The Python bridge owns Vosk + ALSA; this module maps recognized text to the
-// same positions used by GPIO and forwards pause/resume commands.
+// same positions used by GPIO while tracking the currently narrated position.
 
 const fs = require('node:fs');
 const path = require('node:path');
@@ -41,7 +41,7 @@ function startVoice(onPosition) {
   const bridge = path.join(__dirname, 'voice_bridge.py');
   if (!fs.existsSync(bridge)) {
     console.error('[VOICE] Missing voice_bridge.py');
-    return { stop() {}, pause() {}, resume() {} };
+    return { stop() {}, setActivePosition() {}, setNarrationPlaying() {} };
   }
 
   const venvPython = process.platform === 'win32'
@@ -54,7 +54,8 @@ function startVoice(onPosition) {
   console.log('[VOICE] Python bridge started, PID:', proc.pid);
 
   let stdoutBuffer = '';
-  let paused = false;
+  let narrationPlaying = false;
+  let activePosition = null;
   let lastPosition = null;
   let lastTriggerAt = 0;
   const SAME_POSITION_COOLDOWN_MS = 3000;
@@ -65,11 +66,18 @@ function startVoice(onPosition) {
     stdoutBuffer = lines.pop() || '';
 
     for (const line of lines) {
-      if (paused || !line.startsWith('FINAL:')) continue;
+      if (!line.startsWith('FINAL:')) continue;
       const recognizedText = line.slice('FINAL:'.length).trim();
       const position = findPositionFromText(recognizedText);
       if (!position) {
         console.log('[VOICE] No keyword in:', recognizedText);
+        continue;
+      }
+
+      // The microphone remains live during narration. Ignore only the current
+      // place; any different place immediately interrupts the loudspeaker.
+      if (narrationPlaying && position === activePosition) {
+        console.log('[VOICE] Ignoring echo from active position:', position);
         continue;
       }
 
@@ -89,25 +97,20 @@ function startVoice(onPosition) {
   proc.on('error', (error) => console.error('[VOICE] Cannot run Python bridge:', error.message));
   proc.on('exit', (code, signal) => console.log('[VOICE] Bridge stopped:', { code, signal }));
 
-  function command(value) {
-    if (!proc.killed && proc.stdin.writable) proc.stdin.write(`${value}\n`);
-  }
-
   return {
     stop() {
       if (!proc.killed) proc.kill('SIGINT');
     },
-    pause() {
-      if (paused) return;
-      paused = true;
-      command('PAUSE');
-      console.log('[VOICE] Paused while narration is playing');
+    setActivePosition(position) {
+      activePosition = Number.isInteger(position) ? position : null;
     },
-    resume() {
-      if (!paused) return;
-      paused = false;
-      command('RESUME');
-      console.log('[VOICE] Listening');
+    setNarrationPlaying(isPlaying) {
+      const nextState = Boolean(isPlaying);
+      if (nextState === narrationPlaying) return;
+      narrationPlaying = nextState;
+      console.log('[VOICE]', narrationPlaying
+        ? 'Listening during narration; say another place to switch'
+        : 'Listening');
     }
   };
 }

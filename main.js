@@ -11,6 +11,7 @@ let voiceController = null;
 let rendererReady = false;
 let pendingPosition = null;
 let narrationPlaying = false;
+let activePosition = null;
 
 function readConfig() {
   const defaults = {
@@ -36,7 +37,12 @@ function readConfig() {
 const config = readConfig();
 if (config.disableGPU) app.disableHardwareAcceleration();
 
-function openPosition(position) {
+function openPosition(position, source = 'UNKNOWN') {
+  console.log(`[POSITION] ${source} -> ${position}`);
+  activePosition = position;
+  if (voiceController && typeof voiceController.setActivePosition === 'function') {
+    voiceController.setActivePosition(position);
+  }
   if (mainWindow && !mainWindow.isDestroyed() && rendererReady) {
     mainWindow.webContents.send('positionUpdate', position, true);
     pendingPosition = null;
@@ -66,7 +72,7 @@ function startGPIO() {
     pending = lines.pop() || '';
     for (const line of lines) {
       const match = /^POSITION:([1-7])$/.exec(line.trim());
-      if (match) openPosition(Number(match[1]));
+      if (match) openPosition(Number(match[1]), 'GPIO');
     }
   });
   gpioProcess.stderr.on('data', (chunk) => {
@@ -86,11 +92,14 @@ function startVoiceRecognition() {
     const { startVoice } = require('./voice');
     voiceController = startVoice((event) => {
       if (Number.isInteger(event) && event >= FIRST_POSITION && event <= LAST_POSITION) {
-        openPosition(event);
+        openPosition(event, 'VOICE');
       }
     });
-    if (narrationPlaying && typeof voiceController.pause === 'function') {
-      voiceController.pause();
+    if (typeof voiceController.setActivePosition === 'function') {
+      voiceController.setActivePosition(activePosition);
+    }
+    if (typeof voiceController.setNarrationPlaying === 'function') {
+      voiceController.setNarrationPlaying(narrationPlaying);
     }
   } catch (error) {
     console.error('[VOICE] Cannot start:', error.message);
@@ -100,9 +109,8 @@ function startVoiceRecognition() {
 ipcMain.on('narration-state', (_event, isPlaying) => {
   narrationPlaying = Boolean(isPlaying);
   if (!voiceController) return;
-  const method = narrationPlaying ? 'pause' : 'resume';
-  if (typeof voiceController[method] === 'function') {
-    voiceController[method]();
+  if (typeof voiceController.setNarrationPlaying === 'function') {
+    voiceController.setNarrationPlaying(narrationPlaying);
   }
 });
 
@@ -123,7 +131,7 @@ function createWindow() {
   rendererReady = false;
   mainWindow.webContents.once('did-finish-load', () => {
     rendererReady = true;
-    if (pendingPosition !== null) openPosition(pendingPosition);
+    if (pendingPosition !== null) openPosition(pendingPosition, 'PENDING');
   });
   mainWindow.on('closed', () => {
     rendererReady = false;
@@ -144,7 +152,7 @@ app.whenReady().then(() => {
 
   if (config.useKeyboard) {
     for (let position = FIRST_POSITION; position <= LAST_POSITION; position++) {
-      globalShortcut.register(String(position), () => openPosition(position));
+      globalShortcut.register(String(position), () => openPosition(position, 'KEYBOARD'));
     }
   }
 

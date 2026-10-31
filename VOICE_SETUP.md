@@ -51,5 +51,29 @@ Noi mot trong bay keyword. Terminal phai in `FINAL: ...`:
 6. Nuoc Mam Nam O
 7. Dinh Lang
 
-Nhan `Ctrl+C`, sau do chay ung dung bang `npm start`. Khi loa dang phat thuyet
-minh, micro tu tam dung; khi bai thuyet minh ket thuc, micro tu nghe lai.
+Nhan `Ctrl+C`, sau do chay ung dung bang `npm start`. Micro tiep tuc nghe trong
+luc phat thuyet minh va bo qua dia danh hien dang phat.
+
+## Tu khoi dong khi bat Raspberry Pi
+
+Raspberry Pi can khoi dong vao Desktop va tu dong dang nhap user `pi`. Cai dat
+autostart mot lan, khong dung `sudo`:
+
+```bash
+cd ~/Desktop/geography_atlat
+bash install_autostart.sh
+sudo reboot
+```
+
+Sau khi vao Desktop, ung dung se tu chay. Xem log:
+
+```bash
+tail -f ~/Desktop/geography_atlat/logs/autostart.log
+```
+
+Go bo tu khoi dong:
+
+```bash
+cd ~/Desktop/geography_atlat
+bash install_autostart.sh --remove
+```
